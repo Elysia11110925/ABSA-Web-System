@@ -1,170 +1,236 @@
-# ABSA-PyTorch
+# ABSA · 方面级情感分析 Web 系统
 
-> Aspect Based Sentiment Analysis, PyTorch Implementations.
+> 北京科技大学 · 计算机与人工智能实践 · 第一周项目
 >
-> 基于方面的情感分析，使用PyTorch实现。
+> Aspect-Based Sentiment Analysis — 基于 PyTorch 的情感分析 Web 应用
 
-![LICENSE](https://img.shields.io/packagist/l/doctrine/orm.svg)
-[![Gitter](https://badges.gitter.im/ABSA-PyTorch/community.svg)](https://gitter.im/ABSA-PyTorch/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-10-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+---
 
-## Requirement
+## 📋 项目概述
 
-* pytorch >= 0.4.0
-* numpy >= 1.13.3
-* sklearn
-* python 3.6 / 3.7
-* transformers
+本项目基于 [ABSA-PyTorch](https://github.com/songyouwei/ABSA-PyTorch)，实现了一个完整的**方面级情感分析（ABSA）**Web 系统。用户输入句子和方面词（aspect），系统判断对该方面的情感是 **正面 / 负面 / 中性**。
 
-To install requirements, run `pip install -r requirements.txt`.
+### 核心功能
 
-* For non-BERT-based models,
-[GloVe pre-trained word vectors](https://github.com/stanfordnlp/GloVe#download-pre-trained-word-vectors) are required, please refer to [data_utils.py](./data_utils.py) for more detail.
+- 🔍 **单模型分析**：选择 LSTM 或 BERT_SPC 进行情感推理
+- ⚡ **双模型对比**：LSTM 和 BERT_SPC 同时推理，结果并排对比
+- 📊 **概率可视化**：三色概率条展示 Negative / Neutral / Positive 分布
+- 🎯 **快捷例句**：4 个预设测试用例一键填入
+- ⌨️ **键盘快捷键**：`Ctrl+Enter` 分析 · `Ctrl+Shift+Enter` 对比 · `Esc` 清空
+- 📱 **响应式设计**：自适应桌面和移动端
 
-## Usage
+---
 
-### Training
+## 🖥 在线演示
 
-```sh
-python train.py --model_name bert_spc --dataset restaurant
+启动后在浏览器打开：**http://127.0.0.1:5000**
+
+![Web Interface](screenshots/web-demo.png)
+
+### 界面截图
+
+| 单模型分析 | 双模型对比 |
+|:---:|:---:|
+| ![Single](screenshots/single.png) | ![Compare](screenshots/compare.png) |
+
+---
+
+## ⚙️ 环境配置
+
+### 依赖
+
+| 组件 | 版本 |
+|------|------|
+| Python | 3.14.3 |
+| PyTorch | 2.11.0+cu128 |
+| CUDA | 12.8 |
+| transformers | 5.13.0 |
+| Flask | 3.1.3 |
+| scikit-learn | 1.9.0 |
+
+### 安装步骤
+
+```bash
+# 1. 安装 PyTorch (CUDA 12.8)
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+
+# 2. 安装依赖
+pip install transformers flask flask-cors scikit-learn numpy
+
+# 3. 下载 GloVe 词向量 (仅 LSTM 模型需要)
+# 从 https://nlp.stanford.edu/data/glove.42B.300d.zip 下载
+# 解压到项目根目录
+
+# 4. (国内用户) 设置 HuggingFace 镜像
+set HF_ENDPOINT=https://hf-mirror.com
 ```
 
-* All implemented models are listed in [models directory](./models/).
-* See [train.py](./train.py) for more training arguments.
-* Refer to [train_k_fold_cross_val.py](./train_k_fold_cross_val.py) for k-fold cross validation support.
+---
 
-### Inference
+## 🚀 快速启动
 
-* Refer to [infer_example.py](./infer_example.py) for both non-BERT-based models and BERT-based models.
+```bash
+cd ABSA-PyTorch
+set PYTHONIOENCODING=utf-8
+set HF_ENDPOINT=https://hf-mirror.com
+python app.py
+```
 
-### Tips
+首次启动会自动加载 LSTM 和 BERT_SPC 模型（约需 10-15 秒），之后在浏览器打开 `http://127.0.0.1:5000`。
 
-* For non-BERT-based models, training procedure is not very stable.
-* BERT-based models are more sensitive to hyperparameters (especially learning rate) on small data sets, see [this issue](https://github.com/songyouwei/ABSA-PyTorch/issues/27).
-* Fine-tuning on the specific task is necessary for releasing the true power of BERT.
+### 训练自己的模型
 
-### Framework
-For flexible training/inference and aspect term extraction, try [PyABSA](https://github.com/yangheng95/PyABSA), which includes all the models in this repository.
+```bash
+# 训练 LSTM
+python train.py --model_name lstm --dataset laptop
 
-## Reviews / Surveys
+# 训练 BERT_SPC
+python train.py --model_name bert_spc --dataset laptop
+```
 
-Qiu, Xipeng, et al. "Pre-trained Models for Natural Language Processing: A Survey." arXiv preprint arXiv:2003.08271 (2020). [[pdf]](https://arxiv.org/pdf/2003.08271)
+模型权重保存在 `state_dict/` 目录。
 
-Zhang, Lei, Shuai Wang, and Bing Liu. "Deep Learning for Sentiment Analysis: A Survey." arXiv preprint arXiv:1801.07883 (2018). [[pdf]](https://arxiv.org/pdf/1801.07883)
+---
 
-Young, Tom, et al. "Recent trends in deep learning based natural language processing." arXiv preprint arXiv:1708.02709 (2017). [[pdf]](https://arxiv.org/pdf/1708.02709)
+## 📊 模型对比
 
+| 指标 | LSTM + GloVe | BERT_SPC | BERT 提升 |
+|------|:-----------:|:--------:|:---------:|
+| **Accuracy** | 68.50% | **78.68%** | **+10.18** |
+| **F1 (macro)** | 63.36% | **74.74%** | **+11.38** |
+| 参数量 | ~0.9M | ~110M | ×122 |
+| 训练时间 | ~3 min | ~10 min | ×3.3 |
+| 推理速度 | 快 (~5ms) | 慢 (~50ms) | ×10 |
 
-## BERT-based models
+### 关键发现
 
-### BERT-ADA ([official](https://github.com/deepopinion/domain-adapted-atsc))
+BERT_SPC 能正确区分**同一句子中不同方面词**的情感：
 
-Rietzler, Alexander, et al. "Adapt or get left behind: Domain adaptation through bert language model finetuning for aspect-target sentiment classification." arXiv preprint arXiv:1908.11860 (2019). [[pdf](https://arxiv.org/pdf/1908.11860)]
+```
+句子: "The screen is great but the battery is poor."
 
-### BERR-PT ([official](https://github.com/howardhsu/BERT-for-RRC-ABSA))
+方面词   | LSTM        | BERT_SPC    | 正确
+--------|-------------|-------------|------
+screen  | Positive ✅ | Positive ✅  | ✅
+battery | Positive ❌ | Negative ✅  | BERT 胜
+```
 
-Xu, Hu, et al. "Bert post-training for review reading comprehension and aspect-based sentiment analysis." arXiv preprint arXiv:1904.02232 (2019). [[pdf](https://arxiv.org/pdf/1904.02232)]
+> LSTM 使用静态 GloVe 词向量，无法区分同一句子中的不同方面；BERT 通过 `[CLS] 句子 [SEP] 方面词 [SEP]` 的输入格式和 Segment Embedding，能感知当前分析的方面词。
 
-### ABSA-BERT-pair ([official](https://github.com/HSLCY/ABSA-BERT-pair))
+---
 
-Sun, Chi, Luyao Huang, and Xipeng Qiu. "Utilizing bert for aspect-based sentiment analysis via constructing auxiliary sentence." arXiv preprint arXiv:1903.09588 (2019). [[pdf](https://arxiv.org/pdf/1903.09588.pdf)]
+## 🏗 系统架构
 
-### LCF-BERT ([lcf_bert.py](./models/lcf_bert.py)) ([official](https://github.com/yangheng95/LCF-ABSA))
+```
+┌──────────────────────┐     HTTP POST      ┌───────────────────────┐
+│  前端 (HTML/CSS/JS)   │ ──────────────────► │  Flask 后端 (app.py)   │
+│                      │                    │                       │
+│  · 句子输入           │ ◄────────────────── │  · /api/predict        │
+│  · 方面词输入         │     JSON 响应       │  · /api/models         │
+│  · 模型选择           │                    │  · 动态加载双模型       │
+│  · 概率可视化         │                    │  · RESTful API         │
+└──────────────────────┘                    └───────┬───────────────┘
+                                                    │
+                                     ┌──────────────┴──────────────┐
+                                     │                             │
+                               LSTM 模型                      BERT_SPC 模型
+                          (GloVe 300d 词向量)            (bert-base-uncased)
+                          (~0.9M 参数, 轻量)             (~110M 参数, 高准确率)
+```
 
-Zeng Biqing, Yang Heng, et al. "LCF: A Local Context Focus Mechanism for Aspect-Based Sentiment Classification." Applied Sciences. 2019, 9, 3389. [[pdf]](https://www.mdpi.com/2076-3417/9/16/3389/pdf)
+### API 接口
 
-### AEN-BERT ([aen.py](./models/aen.py))
+**`POST /api/predict`**
 
-Song, Youwei, et al. "Attentional Encoder Network for Targeted Sentiment Classification." arXiv preprint arXiv:1902.09314 (2019). [[pdf]](https://arxiv.org/pdf/1902.09314.pdf)
+```json
+// 请求
+{
+  "sentence": "The screen is great but the battery is poor.",
+  "aspect": "screen",
+  "model_type": "bert_spc"
+}
 
-### BERT for Sentence Pair Classification ([bert_spc.py](./models/bert_spc.py))
+// 响应
+{
+  "result": {
+    "sentiment": "Positive",
+    "probabilities": {
+      "Negative": 0.1562,
+      "Neutral": 0.0405,
+      "Positive": 0.8033
+    }
+  }
+}
+```
 
-Devlin, Jacob, et al. "Bert: Pre-training of deep bidirectional transformers for language understanding." arXiv preprint arXiv:1810.04805 (2018). [[pdf]](https://arxiv.org/pdf/1810.04805.pdf)
+**`GET /api/models`** — 返回可用模型列表
 
+---
 
-## Non-BERT-based models
+## 📁 项目结构
 
-### ASGCN ([asgcn.py](./models/asgcn.py)) ([official](https://github.com/GeneZC/ASGCN))
+```
+ABSA-PyTorch/
+├── app.py                              # Flask 后端（Web 系统入口）
+├── templates/
+│   └── index.html                      # 前端页面（纯 HTML/CSS/JS）
+├── train.py                            # 模型训练脚本
+├── infer_example.py                    # 推理脚本模板
+├── data_utils.py                       # 数据处理 & Tokenizer
+├── state_dict/                         # 训练好的模型权重
+│   ├── lstm_laptop_val_acc_0.685      # LSTM 最佳模型 (68.50%)
+│   └── bert_spc_laptop_val_acc_0.7868 # BERT 最佳模型 (78.68%)
+├── models/                             # 模型定义
+│   ├── lstm.py                         # LSTM (25 行)
+│   ├── bert_spc.py                     # BERT_SPC (已修复)
+│   └── lcf_bert.py                     # LCF_BERT (已修复导入)
+├── layers/
+│   └── dynamic_rnn.py                  # 动态 LSTM 层 (已修复)
+├── datasets/semeval14/                 # SemEval 2014 数据集
+├── laptop_tokenizer.dat               # Tokenizer（自动生成）
+├── 300_laptop_embedding_matrix.dat    # GloVe 词向量矩阵（自动生成）
+├── README.md                           # 本文件
+└── 实验记录.md                          # 详细实验记录
+```
 
-Zhang, Chen, et al. "Aspect-based Sentiment Classification with Aspect-specific Graph Convolutional Networks." Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing. 2019. [[pdf]](https://www.aclweb.org/anthology/D19-1464)
+---
 
-### MGAN ([mgan.py](./models/mgan.py))
+## 🐛 已知问题与解决
 
-Fan, Feifan, et al. "Multi-grained Attention Network for Aspect-Level Sentiment Classification." Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing. 2018. [[pdf]](http://aclweb.org/anthology/D18-1380)
+| # | 问题 | 解决方案 |
+|---|------|----------|
+| 1 | Python 3.14 无 tokenizers 预编译包 | 升级 transformers 5.13.0 |
+| 2 | `pack_padded_sequence` 要求 CPU tensor | `dynamic_rnn.py` + `.cpu()` |
+| 3 | transformers 5.x 导入路径变更 | 改为 `transformers.models.bert.modeling_bert` |
+| 4 | BERT 输出迭代返回 key 而非 value | 改用 `outputs.pooler_output` |
+| 5 | HuggingFace 国内连接超时 | 设置 `HF_ENDPOINT=https://hf-mirror.com` |
+| 6 | 浏览器缓存旧版页面 | `Cache-Control: no-cache` meta 标签 |
+| 7 | Jinja2 模板缓存不更新 | `TEMPLATES_AUTO_RELOAD = True` |
+| 8 | 端口被多进程占用 | 用 PowerShell 彻底清理 Python 进程 |
 
-### AOA ([aoa.py](./models/aoa.py))
+---
 
-Huang, Binxuan, et al. "Aspect Level Sentiment Classification with Attention-over-Attention Neural Networks." arXiv preprint arXiv:1804.06536 (2018). [[pdf]](https://arxiv.org/pdf/1804.06536.pdf)
+## 📚 参考资料
 
-### TNet ([tnet_lf.py](./models/tnet_lf.py)) ([official](https://github.com/lixin4ever/TNet))
+- [ABSA-PyTorch](https://github.com/songyouwei/ABSA-PyTorch) — 原始开源项目
+- [BERT: Pre-training of Deep Bidirectional Transformers](https://arxiv.org/abs/1810.04805) (Devlin et al., 2018)
+- [GloVe: Global Vectors for Word Representation](https://nlp.stanford.edu/projects/glove/) (Pennington et al., 2014)
+- [SemEval-2014 Task 4](https://alt.qcri.org/semeval2014/task4/) — Laptop/Restaurant 数据集
 
-Li, Xin, et al. "Transformation Networks for Target-Oriented Sentiment Classification." arXiv preprint arXiv:1805.01086 (2018). [[pdf]](https://arxiv.org/pdf/1805.01086)
+---
 
-### Cabasc ([cabasc.py](./models/cabasc.py))
+## 📝 实验记录
 
-Liu, Qiao, et al. "Content Attention Model for Aspect Based Sentiment Analysis." Proceedings of the 2018 World Wide Web Conference on World Wide Web. International World Wide Web Conferences Steering Committee, 2018.
+详细训练日志、测试结果和问题排查见 [实验记录.md](./实验记录.md)。
 
-### RAM ([ram.py](./models/ram.py))
+---
 
-Chen, Peng, et al. "Recurrent Attention Network on Memory for Aspect Sentiment Analysis." Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing. 2017. [[pdf]](http://www.aclweb.org/anthology/D17-1047)
+## 📄 许可
 
-### MemNet ([memnet.py](./models/memnet.py)) ([official](https://drive.google.com/open?id=1Hc886aivHmIzwlawapzbpRdTfPoTyi1U))
+本项目基于 MIT 许可的 [ABSA-PyTorch](https://github.com/songyouwei/ABSA-PyTorch) 开发。
 
-Tang, Duyu, B. Qin, and T. Liu. "Aspect Level Sentiment Classification with Deep Memory Network." Conference on Empirical Methods in Natural Language Processing 2016:214-224. [[pdf]](https://arxiv.org/pdf/1605.08900)
+---
 
-### IAN ([ian.py](./models/ian.py))
-
-Ma, Dehong, et al. "Interactive Attention Networks for Aspect-Level Sentiment Classification." arXiv preprint arXiv:1709.00893 (2017). [[pdf]](https://arxiv.org/pdf/1709.00893)
-
-### ATAE-LSTM ([atae_lstm.py](./models/atae_lstm.py))
-
-Wang, Yequan, Minlie Huang, and Li Zhao. "Attention-based lstm for aspect-level sentiment classification." Proceedings of the 2016 conference on empirical methods in natural language processing. 2016.
-
-### TD-LSTM ([td_lstm.py](./models/td_lstm.py), [tc_lstm.py](./models/tc_lstm.py)) ([official](https://drive.google.com/open?id=17RF8MZs456ov9MDiUYZp0SCGL6LvBQl6))
-
-Tang, Duyu, et al. "Effective LSTMs for Target-Dependent Sentiment Classification." Proceedings of COLING 2016, the 26th International Conference on Computational Linguistics: Technical Papers. 2016. [[pdf]](https://arxiv.org/pdf/1512.01100)
-
-### LSTM ([lstm.py](./models/lstm.py))
-
-Hochreiter, Sepp, and Jürgen Schmidhuber. "Long short-term memory." Neural computation 9.8 (1997): 1735-1780. [[pdf](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.676.4320&rep=rep1&type=pdf)]
-
-## Note on running with RTX30*
-If you are running on RTX30 series there may be some compatibility issues between installed/required versions of torch, cuda.
-In that case try using `requirements_rtx30.txt` instead of `requirements.txt`.
-
-## Contributors
-
-Thanks goes to these wonderful people:
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/AlbertoPaz"><img src="https://avatars2.githubusercontent.com/u/36967362?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alberto Paz</b></sub></a><br /><a href="https://github.com/songyouwei/ABSA-PyTorch/commits?author=AlbertoPaz" title="Code">💻</a></td>
-    <td align="center"><a href="http://taojiang0923@gmail.com"><img src="https://avatars0.githubusercontent.com/u/37891032?v=4?s=100" width="100px;" alt=""/><br /><sub><b>jiangtao </b></sub></a><br /><a href="https://github.com/songyouwei/ABSA-PyTorch/commits?author=jiangtaojy" title="Code">💻</a></td>
-    <td align="center"><a href="https://genezc.github.io"><img src="https://avatars0.githubusercontent.com/u/24239326?v=4?s=100" width="100px;" alt=""/><br /><sub><b>WhereIsMyHead</b></sub></a><br /><a href="https://github.com/songyouwei/ABSA-PyTorch/commits?author=GeneZC" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/songyouwei"><img src="https://avatars1.githubusercontent.com/u/2573291?v=4?s=100" width="100px;" alt=""/><br /><sub><b>songyouwei</b></sub></a><br /><a href="https://github.com/songyouwei/ABSA-PyTorch/commits?author=songyouwei" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/yangheng95"><img src="https://avatars2.githubusercontent.com/u/51735130?v=4?s=100" width="100px;" alt=""/><br /><sub><b>YangHeng</b></sub></a><br /><a href="https://github.com/songyouwei/ABSA-PyTorch/commits?author=yangheng95" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/rmarcacini"><img src="https://avatars0.githubusercontent.com/u/40037976?v=4?s=100" width="100px;" alt=""/><br /><sub><b>rmarcacini</b></sub></a><br /><a href="https://github.com/songyouwei/ABSA-PyTorch/commits?author=rmarcacini" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/ZhangYikaii"><img src="https://avatars1.githubusercontent.com/u/46623714?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Yikai Zhang</b></sub></a><br /><a href="https://github.com/songyouwei/ABSA-PyTorch/commits?author=ZhangYikaii" title="Code">💻</a></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/anayden"><img src="https://avatars0.githubusercontent.com/u/17383?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alexey Naiden</b></sub></a><br /><a href="https://github.com/songyouwei/ABSA-PyTorch/commits?author=anayden" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/hbeybutyan"><img src="https://avatars.githubusercontent.com/u/16852864?v=4?s=100" width="100px;" alt=""/><br /><sub><b>hbeybutyan</b></sub></a><br /><a href="https://github.com/songyouwei/ABSA-PyTorch/commits?author=hbeybutyan" title="Code">💻</a></td>
-    <td align="center"><a href="https://prasys.info"><img src="https://avatars.githubusercontent.com/u/15159757?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Pradeesh</b></sub></a><br /><a href="https://github.com/songyouwei/ABSA-PyTorch/commits?author=prasys" title="Code">💻</a></td>
-  </tr>
-</table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
-
-## Licence
-
-MIT
+> **作者**: Elysia11110925  
+> **日期**: 2026年7月  
+> **课程**: 北京科技大学 · 计算机与人工智能实践 · 暑期小学期

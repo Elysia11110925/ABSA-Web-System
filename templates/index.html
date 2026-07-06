@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>ABSA - Aspect-Based Sentiment Analysis</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 36px 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 { font-size: 26px; color: #333; margin-bottom: 2px; }
+        .subtitle { color: #999; font-size: 13px; margin-bottom: 24px; }
+
+        /* Quick examples */
+        .examples { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .ex-btn {
+            padding: 6px 14px;
+            border: 1.5px solid #d0d5f0;
+            background: #f5f6ff;
+            color: #5a67d8;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .ex-btn:hover { background: #667eea; color: white; border-color: #667eea; }
+
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-weight: 600; color: #444; margin-bottom: 5px; font-size: 13px; }
+        textarea, input[type="text"], select {
+            width: 100%; padding: 11px 14px;
+            border: 2px solid #e0e0e0; border-radius: 8px;
+            font-size: 14px; font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        textarea:focus, input:focus, select:focus { outline: none; border-color: #667eea; }
+        textarea { resize: vertical; min-height: 56px; }
+        .row { display: flex; gap: 14px; }
+        .row > .form-group { flex: 1; min-width: 0; }
+        select { cursor: pointer; background: white; }
+
+        .btn-row { display: flex; gap: 10px; }
+        .btn {
+            flex: 1; padding: 12px 16px; border: none; border-radius: 8px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s, opacity 0.2s;
+        }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-outline { background: white; color: #667eea; border: 2px solid #667eea; }
+        .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(102,126,234,0.35); }
+        .btn:active:not(:disabled) { transform: translateY(0); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* Loading */
+        .loading { text-align: center; margin: 20px 0; display: none; }
+        .loading.show { display: block; }
+        .spinner {
+            width: 32px; height: 32px;
+            border: 3px solid #e0e0e0; border-top: 3px solid #667eea;
+            border-radius: 50%; animation: spin 0.7s linear infinite;
+            margin: 0 auto 6px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Result card */
+        .result-card {
+            margin-top: 20px; padding: 18px 20px; border-radius: 12px;
+            display: none; position: relative;
+        }
+        .result-card.show { display: block; }
+        .result-card.Positive { background: #e8f5e9; border: 2px solid #4caf50; }
+        .result-card.Negative { background: #fbe9e7; border: 2px solid #f44336; }
+        .result-card.Neutral  { background: #fff8e1; border: 2px solid #ff9800; }
+
+        .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .sentiment-badge {
+            font-size: 20px; font-weight: 700;
+        }
+        .result-card.Positive .sentiment-badge { color: #2e7d32; }
+        .result-card.Negative .sentiment-badge { color: #c62828; }
+        .result-card.Neutral  .sentiment-badge { color: #e65100; }
+        .model-tag {
+            font-size: 11px; padding: 4px 10px; border-radius: 12px;
+            background: rgba(255,255,255,0.7); color: #555; font-weight: 600;
+        }
+        .time-tag { font-size: 11px; color: #999; }
+
+        .prob-bar-group { margin-bottom: 8px; }
+        .prob-label { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 3px; }
+        .prob-bar-track { height: 7px; background: #e0e0e0; border-radius: 4px; overflow: hidden; }
+        .prob-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+        .prob-bar-fill.neg { background: #f44336; }
+        .prob-bar-fill.neu { background: #ff9800; }
+        .prob-bar-fill.pos { background: #4caf50; }
+
+        /* Compare mode */
+        .compare-row { display: flex; gap: 14px; margin-top: 16px; }
+        .compare-row .result-card { flex: 1; margin-top: 0; }
+
+        .error { margin-top: 18px; padding: 14px; background: #ffebee; border: 2px solid #f44336; border-radius: 8px; color: #c62828; display: none; }
+        .error.show { display: block; }
+        .warning { margin-top: 6px; padding: 8px 12px; background: #fff3e0; border-radius: 6px; color: #e65100; font-size: 12px; display: none; }
+        .warning.show { display: block; }
+
+        @media (max-width: 640px) {
+            .container { padding: 24px 20px; }
+            .row { flex-direction: column; gap: 0; }
+            .compare-row { flex-direction: column; }
+            .btn-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>ABSA · 方面级情感分析</h1>
+    <p class="subtitle">Aspect-Based Sentiment Analysis — 判断句子中对特定方面的情感是正面、负面还是中性</p>
+
+    <!-- Quick examples -->
+    <div class="examples">
+        <span style="font-size:12px;color:#999;margin-right:4px;">快捷例句:</span>
+        <button class="ex-btn" onclick="fillExample('The screen is great but the battery is poor.','screen')">Screen vs Battery</button>
+        <button class="ex-btn" onclick="fillExample('The food was delicious but the service was terrible.','food')">Food vs Service</button>
+        <button class="ex-btn" onclick="fillExample('The tech guy then said the service center does not do 1-to-1 exchange.','service center')">Service Center</button>
+        <button class="ex-btn" onclick="fillExample('I charge it at night and skip taking the cord with me because of the good battery life.','battery life')">Battery Life</button>
+    </div>
+
+    <div class="form-group">
+        <label for="sentence">输入句子 Sentence</label>
+        <textarea id="sentence" placeholder="例: The screen is great but the battery is poor."></textarea>
+    </div>
+
+    <div class="row">
+        <div class="form-group">
+            <label for="aspect">方面词 Aspect</label>
+            <input type="text" id="aspect" placeholder="例: screen">
+        </div>
+        <div class="form-group">
+            <label for="model-type">推理模型</label>
+            <select id="model-type">
+                <option value="lstm">LSTM + GloVe (轻量快速)</option>
+                <option value="bert_spc" selected>BERT_SPC (高准确率)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="btn-row">
+        <button class="btn btn-primary" id="submit-btn" onclick="analyze()">🔍 单模型分析</button>
+        <button class="btn btn-outline" id="compare-btn" onclick="compareBoth()">⚡ 双模型对比</button>
+        <button class="btn" style="flex:0.4;background:#f5f5f5;color:#888;border:2px solid #e0e0e0;" onclick="clearAll()">✕ 清空</button>
+    </div>
+    <p style="font-size:11px;color:#bbb;text-align:center;margin-top:6px;">提示: Ctrl+Enter 单模型分析 · Ctrl+Shift+Enter 双模型对比 · Esc 清空</p>
+
+    <div class="loading" id="loading"><div class="spinner"></div><p style="color:#888;font-size:13px;">模型推理中...</p></div>
+
+    <div class="error" id="error"></div>
+
+    <!-- Single result -->
+    <div class="result-card" id="result">
+        <div class="result-header">
+            <span class="sentiment-badge" id="sentiment-text"></span>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <span class="model-tag" id="model-tag"></span>
+                <span class="time-tag" id="time-tag"></span>
+            </div>
+        </div>
+        <div id="prob-bars"></div>
+    </div>
+
+    <!-- Compare results -->
+    <div class="compare-row" id="compare-container">
+        <div class="result-card" id="result-lstm">
+            <div class="result-header">
+                <span class="sentiment-badge" id="sentiment-lstm"></span>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <span class="model-tag" style="background:#e3f2fd;">LSTM + GloVe</span>
+                    <span class="time-tag" id="time-lstm"></span>
+                </div>
+            </div>
+            <div id="prob-bars-lstm"></div>
+        </div>
+        <div class="result-card" id="result-bert">
+            <div class="result-header">
+                <span class="sentiment-badge" id="sentiment-bert"></span>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <span class="model-tag" style="background:#fce4ec;">BERT_SPC</span>
+                    <span class="time-tag" id="time-bert"></span>
+                </div>
+            </div>
+            <div id="prob-bars-bert"></div>
+        </div>
+    </div>
+    <div class="warning" id="compare-warning"></div>
+
+    <div class="warning" id="warning"></div>
+
+    <!-- Footer -->
+    <div style="margin-top:28px;padding-top:16px;border-top:1px solid #e8e8e8;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#bbb;">
+        <span>🖥 Device: <strong id="footer-device">GPU</strong></span>
+        <span>📊 模型: LSTM (68.5%) · BERT_SPC (78.7%)</span>
+    </div>
+</div>
+
+<script>
+const LABELS = ['Negative', 'Neutral', 'Positive'];
+const ICONS = {Negative: '😡', Neutral: '😐', Positive: '😊'};
+const COLORS = {Negative: 'neg', Neutral: 'neu', Positive: 'pos'};
+
+function fillExample(sentence, aspect) {
+    document.getElementById('sentence').value = sentence;
+    document.getElementById('aspect').value = aspect;
+    document.getElementById('aspect').focus();
+}
+
+function resetUI() {
+    document.getElementById('error').className = 'error';
+    document.getElementById('warning').style.display = 'none';
+    document.getElementById('compare-warning').style.display = 'none';
+    document.getElementById('result').className = 'result-card';
+    document.getElementById('result').style.display = 'none';
+    document.getElementById('result-lstm').className = 'result-card';
+    document.getElementById('result-lstm').style.display = 'none';
+    document.getElementById('result-bert').className = 'result-card';
+    document.getElementById('result-bert').style.display = 'none';
+    document.getElementById('compare-container').style.display = 'none';
+}
+
+function renderBars(containerId, probs) {
+    let html = '';
+    for (const label of LABELS) {
+        const pct = (probs[label] * 100).toFixed(1);
+        html += `<div class="prob-bar-group">
+            <div class="prob-label"><span>${ICONS[label]} ${label}</span><span>${pct}%</span></div>
+            <div class="prob-bar-track"><div class="prob-bar-fill ${COLORS[label]}" style="width:${pct}%"></div></div>
+        </div>`;
+    }
+    document.getElementById(containerId).innerHTML = html;
+}
+
+function showResult(cardId, sentimentId, tagId, timeId, data, timeMs) {
+    const card = document.getElementById(cardId);
+    card.classList.add('show', data.sentiment);
+    card.style.display = 'block';
+    document.getElementById(sentimentId).textContent = ICONS[data.sentiment] + ' ' + data.sentiment;
+    document.getElementById(timeId).textContent = timeMs + 'ms';
+}
+
+async function analyze() {
+    const sentence = document.getElementById('sentence').value.trim();
+    const aspect = document.getElementById('aspect').value.trim();
+    const modelType = document.getElementById('model-type').value;
+
+    resetUI();
+    if (!sentence) { showError('请输入句子'); return; }
+    if (!aspect)  { showError('请输入方面词'); return; }
+
+    setLoading(true);
+    const start = performance.now();
+    try {
+        const resp = await fetch('/api/predict', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({sentence, aspect, model_type: modelType})
+        });
+        const data = await resp.json();
+        const elapsed = Math.round(performance.now() - start);
+        setLoading(false);
+
+        if (data.error) { showError(data.error); return; }
+        const result = data.result;
+        if (result.error) { showError(result.error); return; }
+
+        document.getElementById('model-tag').textContent = modelType === 'lstm' ? 'LSTM + GloVe' : 'BERT_SPC';
+        showResult('result', 'sentiment-text', '', 'time-tag', result, elapsed);
+        renderBars('prob-bars', result.probabilities);
+
+        if (data.warning) {
+            document.getElementById('warning').style.display = 'block';
+            document.getElementById('warning').textContent = '⚠ ' + data.warning;
+        }
+    } catch (err) {
+        setLoading(false);
+        showError('Network error: ' + err.message);
+    }
+}
+
+async function timedFetch(url, body) {
+    const t0 = performance.now();
+    const resp = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    const elapsed = Math.round(performance.now() - t0);
+    const data = await resp.json();
+    return {data, elapsed};
+}
+
+async function compareBoth() {
+    const sentence = document.getElementById('sentence').value.trim();
+    const aspect = document.getElementById('aspect').value.trim();
+
+    resetUI();
+    if (!sentence) { showError('请输入句子'); return; }
+    if (!aspect)  { showError('请输入方面词'); return; }
+
+    setLoading(true);
+
+    try {
+        const [rL, rB] = await Promise.all([
+            timedFetch('/api/predict', {sentence, aspect, model_type: 'lstm'}),
+            timedFetch('/api/predict', {sentence, aspect, model_type: 'bert_spc'})
+        ]);
+        setLoading(false);
+
+        const {data: dataL, elapsed: elapsedL} = rL;
+        const {data: dataB, elapsed: elapsedB} = rB;
+
+        if (dataL.error || dataL.result?.error) { showError(dataL.error || dataL.result.error); return; }
+        if (dataB.error || dataB.result?.error) { showError(dataB.error || dataB.result.error); return; }
+
+        document.getElementById('compare-container').style.display = 'flex';
+
+        showResult('result-lstm', 'sentiment-lstm', '', 'time-lstm', dataL.result, elapsedL);
+        renderBars('prob-bars-lstm', dataL.result.probabilities);
+
+        showResult('result-bert', 'sentiment-bert', '', 'time-bert', dataB.result, elapsedB);
+        renderBars('prob-bars-bert', dataB.result.probabilities);
+
+        // Highlight matching/diverging predictions
+        const same = dataL.result.sentiment === dataB.result.sentiment;
+        const div = document.getElementById('compare-warning');
+        div.style.display = 'block';
+        div.style.background = same ? '#e8f5e9' : '#fff3e0';
+        div.style.color = same ? '#2e7d32' : '#e65100';
+        div.textContent = same ? '✅ 两个模型预测一致: ' + dataL.result.sentiment : '⚠️ 两个模型预测不一致! LSTM=' + dataL.result.sentiment + ', BERT=' + dataB.result.sentiment;
+
+        if (dataL.warning || dataB.warning) {
+            div.textContent += ' | ' + (dataL.warning || dataB.warning);
+        }
+
+    } catch (err) {
+        setLoading(false);
+        showError('Network error: ' + err.message);
+    }
+}
+
+function setLoading(on) {
+    document.getElementById('loading').className = on ? 'loading show' : 'loading';
+    document.getElementById('submit-btn').disabled = on;
+    document.getElementById('compare-btn').disabled = on;
+}
+
+function showError(msg) {
+    const errDiv = document.getElementById('error');
+    errDiv.textContent = msg;
+    errDiv.classList.add('show');
+}
+
+function clearAll() {
+    document.getElementById('sentence').value = '';
+    document.getElementById('aspect').value = '';
+    resetUI();
+    document.getElementById('sentence').focus();
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.shiftKey && e.key === 'Enter') {
+        e.preventDefault(); compareBoth();
+    } else if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault(); analyze();
+    } else if (e.key === 'Escape') {
+        e.preventDefault(); clearAll();
+    }
+});
+</script>
+</body>
+</html>
