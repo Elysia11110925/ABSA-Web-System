@@ -69,14 +69,36 @@ set HF_ENDPOINT=https://hf-mirror.com
 
 ## 🚀 快速启动
 
+### ⚠️ 重要：必须用 `git clone`，不能用 Download ZIP
+
+BERT 模型 (418MB) 通过 Git LFS 存储，**Download ZIP 只会下载一个指针文件，模型无法使用**。
+
 ```bash
-cd ABSA-PyTorch
+# 1. 安装 Git LFS（首次使用需要）
+# 下载: https://git-lfs.com  → 安装后运行:
+git lfs install
+
+# 2. 克隆仓库（自动下载模型）
+git clone https://github.com/Elysia11110925/ABSA-Web-System.git
+cd ABSA-Web-System
+
+# 3. 一键启动
+setup.bat
+```
+
+### 手动启动（如果 setup.bat 不适用）
+
+```bash
+cd ABSA-Web-System
+pip install torch transformers flask flask-cors scikit-learn numpy
 set PYTHONIOENCODING=utf-8
 set HF_ENDPOINT=https://hf-mirror.com
 python app.py
 ```
 
-首次启动会自动加载 LSTM 和 BERT_SPC 模型（约需 10-15 秒），之后在浏览器打开 `http://127.0.0.1:5000`。
+浏览器打开 **http://127.0.0.1:5000**。
+
+首次启动加载模型约需 10-15 秒。如遇 HuggingFace 连接问题，确保已设置 `HF_ENDPOINT=https://hf-mirror.com`。
 
 ### 训练自己的模型
 
