@@ -96,7 +96,7 @@ set HF_ENDPOINT=https://hf-mirror.com
 python app.py
 ```
 
-浏览器打开 **http://127.0.0.1:5000**。
+浏览器打开 **http://127.0.0.1:5000** 即可使用。
 
 首次启动加载模型约需 10-15 秒。如遇 HuggingFace 连接问题，确保已设置 `HF_ENDPOINT=https://hf-mirror.com`。
 
