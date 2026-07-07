@@ -11,7 +11,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0f0f1a;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -19,110 +19,119 @@
             padding: 30px 20px;
         }
         .container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: #1a1a2e;
+            border-radius: 20px;
+            box-shadow: 0 4px 40px rgba(0,0,0,0.5);
             padding: 36px 40px;
             max-width: 800px;
             width: 100%;
         }
-        h1 { font-size: 26px; color: #333; margin-bottom: 2px; }
-        .subtitle { color: #999; font-size: 13px; margin-bottom: 24px; }
+        h1 { font-size: 26px; color: #e8e8f0; margin-bottom: 2px; }
+        .subtitle { color: #777; font-size: 13px; margin-bottom: 8px; }
+        .header-badge {
+            display: inline-block; font-size: 10px; font-weight: 600;
+            padding: 3px 10px; border-radius: 12px; margin-bottom: 16px;
+            background: rgba(99,102,241,0.15); color: #818cf8; letter-spacing: .3px;
+        }
 
         /* Quick examples */
         .examples { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
         .ex-btn {
             padding: 6px 14px;
-            border: 1.5px solid #d0d5f0;
-            background: #f5f6ff;
-            color: #5a67d8;
+            border: 1px solid #2d2d4a;
+            background: #232340;
+            color: #a5b4fc;
             border-radius: 20px;
             font-size: 12px;
             cursor: pointer;
             transition: all 0.15s;
             white-space: nowrap;
         }
-        .ex-btn:hover { background: #667eea; color: white; border-color: #667eea; }
+        .ex-btn:hover { background: #6366f1; color: white; border-color: #6366f1; }
 
         .form-group { margin-bottom: 18px; }
-        label { display: block; font-weight: 600; color: #444; margin-bottom: 5px; font-size: 13px; }
+        label { display: block; font-weight: 600; color: #a0a0b8; margin-bottom: 5px; font-size: 13px; }
         textarea, input[type="text"], select {
             width: 100%; padding: 11px 14px;
-            border: 2px solid #e0e0e0; border-radius: 8px;
+            border: 2px solid #2d2d4a; border-radius: 10px;
             font-size: 14px; font-family: inherit;
             transition: border-color 0.2s;
+            background: #16162b; color: #d0d0e0;
         }
-        textarea:focus, input:focus, select:focus { outline: none; border-color: #667eea; }
+        textarea:focus, input:focus, select:focus { outline: none; border-color: #6366f1; background: #1e1e38; }
+        textarea::placeholder, input::placeholder { color: #555; }
         textarea { resize: vertical; min-height: 56px; }
         .row { display: flex; gap: 14px; }
         .row > .form-group { flex: 1; min-width: 0; }
-        select { cursor: pointer; background: white; }
+        select { cursor: pointer; }
 
         .btn-row { display: flex; gap: 10px; }
         .btn {
-            flex: 1; padding: 12px 16px; border: none; border-radius: 8px;
+            flex: 1; padding: 12px 16px; border: none; border-radius: 10px;
             font-size: 14px; font-weight: 600; cursor: pointer;
             transition: transform 0.1s, box-shadow 0.2s, opacity 0.2s;
         }
-        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
-        .btn-outline { background: white; color: #667eea; border: 2px solid #667eea; }
-        .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(102,126,234,0.35); }
+        .btn-primary { background: #6366f1; color: white; }
+        .btn-outline { background: transparent; color: #818cf8; border: 2px solid #6366f1; }
+        .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(99,102,241,0.3); }
         .btn:active:not(:disabled) { transform: translateY(0); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
         /* Loading */
         .loading { text-align: center; margin: 20px 0; display: none; }
         .loading.show { display: block; }
         .spinner {
             width: 32px; height: 32px;
-            border: 3px solid #e0e0e0; border-top: 3px solid #667eea;
+            border: 3px solid #2d2d4a; border-top: 3px solid #6366f1;
             border-radius: 50%; animation: spin 0.7s linear infinite;
             margin: 0 auto 6px;
         }
+        .loading p { color: #777 !important; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Result card */
         .result-card {
-            margin-top: 20px; padding: 18px 20px; border-radius: 12px;
+            margin-top: 20px; padding: 18px 20px; border-radius: 14px;
             display: none; position: relative;
         }
         .result-card.show { display: block; }
-        .result-card.Positive { background: #e8f5e9; border: 2px solid #4caf50; }
-        .result-card.Negative { background: #fbe9e7; border: 2px solid #f44336; }
-        .result-card.Neutral  { background: #fff8e1; border: 2px solid #ff9800; }
+        .result-card.Positive { background: rgba(16,185,129,0.1); border: 2px solid #10b981; }
+        .result-card.Negative { background: rgba(239,68,68,0.1); border: 2px solid #ef4444; }
+        .result-card.Neutral  { background: rgba(245,158,11,0.1); border: 2px solid #f59e0b; }
 
         .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .sentiment-badge {
-            font-size: 20px; font-weight: 700;
-        }
-        .result-card.Positive .sentiment-badge { color: #2e7d32; }
-        .result-card.Negative .sentiment-badge { color: #c62828; }
-        .result-card.Neutral  .sentiment-badge { color: #e65100; }
+        .sentiment-badge { font-size: 20px; font-weight: 700; }
+        .result-card.Positive .sentiment-badge { color: #34d399; }
+        .result-card.Negative .sentiment-badge { color: #f87171; }
+        .result-card.Neutral  .sentiment-badge { color: #fbbf24; }
         .model-tag {
             font-size: 11px; padding: 4px 10px; border-radius: 12px;
-            background: rgba(255,255,255,0.7); color: #555; font-weight: 600;
+            background: rgba(255,255,255,0.08); color: #aaa; font-weight: 600;
         }
-        .time-tag { font-size: 11px; color: #999; }
+        .time-tag { font-size: 11px; color: #666; }
 
         .prob-bar-group { margin-bottom: 8px; }
-        .prob-label { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 3px; }
-        .prob-bar-track { height: 7px; background: #e0e0e0; border-radius: 4px; overflow: hidden; }
+        .prob-label { display: flex; justify-content: space-between; font-size: 12px; color: #999; margin-bottom: 3px; }
+        .prob-bar-track { height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
         .prob-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
-        .prob-bar-fill.neg { background: #f44336; }
-        .prob-bar-fill.neu { background: #ff9800; }
-        .prob-bar-fill.pos { background: #4caf50; }
+        .prob-bar-fill.neg { background: #ef4444; }
+        .prob-bar-fill.neu { background: #f59e0b; }
+        .prob-bar-fill.pos { background: #10b981; }
 
         /* Compare mode */
         .compare-row { display: flex; gap: 14px; margin-top: 16px; }
         .compare-row .result-card { flex: 1; margin-top: 0; }
 
-        .error { margin-top: 18px; padding: 14px; background: #ffebee; border: 2px solid #f44336; border-radius: 8px; color: #c62828; display: none; }
+        .error { margin-top: 18px; padding: 14px; background: rgba(239,68,68,0.1); border: 2px solid #ef4444; border-radius: 10px; color: #f87171; display: none; font-size: 13px; }
         .error.show { display: block; }
-        .warning { margin-top: 6px; padding: 8px 12px; background: #fff3e0; border-radius: 6px; color: #e65100; font-size: 12px; display: none; }
+        .warning { margin-top: 6px; padding: 8px 12px; background: rgba(245,158,11,0.1); border-radius: 8px; color: #fbbf24; font-size: 12px; display: none; }
         .warning.show { display: block; }
 
+        /* Footer */
+        .page-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 14px; border-top: 1px solid #2d2d4a; font-size: 11px; color: #555; }
+
         @media (max-width: 640px) {
-            .container { padding: 24px 20px; }
+            .container { padding: 24px 20px; border-radius: 14px; }
             .row { flex-direction: column; gap: 0; }
             .compare-row { flex-direction: column; }
             .btn-row { flex-direction: column; }
@@ -133,6 +142,7 @@
 <div class="container">
     <h1>ABSA · 方面级情感分析</h1>
     <p class="subtitle">Aspect-Based Sentiment Analysis — 判断句子中对特定方面的情感是正面、负面还是中性</p>
+    <span class="header-badge">NLP · Deep Learning · LSTM vs BERT</span>
 
     <!-- Quick examples -->
     <div class="examples">
@@ -165,9 +175,9 @@
     <div class="btn-row">
         <button class="btn btn-primary" id="submit-btn" onclick="analyze()">🔍 单模型分析</button>
         <button class="btn btn-outline" id="compare-btn" onclick="compareBoth()">⚡ 双模型对比</button>
-        <button class="btn" style="flex:0.4;background:#f5f5f5;color:#888;border:2px solid #e0e0e0;" onclick="clearAll()">✕ 清空</button>
+        <button class="btn" style="flex:0.4;background:transparent;color:#666;border:2px solid #2d2d4a;" onclick="clearAll()">✕ 清空</button>
     </div>
-    <p style="font-size:11px;color:#bbb;text-align:center;margin-top:6px;">提示: Ctrl+Enter 单模型分析 · Ctrl+Shift+Enter 双模型对比 · Esc 清空</p>
+    <p style="font-size:11px;color:#555;text-align:center;margin-top:6px;">提示: Ctrl+Enter 单模型分析 · Ctrl+Shift+Enter 双模型对比 · Esc 清空</p>
 
     <div class="loading" id="loading"><div class="spinner"></div><p style="color:#888;font-size:13px;">模型推理中...</p></div>
 
@@ -213,9 +223,9 @@
     <div class="warning" id="warning"></div>
 
     <!-- Footer -->
-    <div style="margin-top:28px;padding-top:16px;border-top:1px solid #e8e8e8;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#bbb;">
+    <div class="page-footer">
         <span>🖥 Device: <strong id="footer-device">GPU</strong></span>
-        <span>📊 模型: LSTM (68.5%) · BERT_SPC (78.7%)</span>
+        <span>📊 LSTM 68.5% · BERT_SPC 78.7%</span>
     </div>
 </div>
 
@@ -341,12 +351,11 @@ async function compareBoth() {
         showResult('result-bert', 'sentiment-bert', '', 'time-bert', dataB.result, elapsedB);
         renderBars('prob-bars-bert', dataB.result.probabilities);
 
-        // Highlight matching/diverging predictions
         const same = dataL.result.sentiment === dataB.result.sentiment;
         const div = document.getElementById('compare-warning');
         div.style.display = 'block';
-        div.style.background = same ? '#e8f5e9' : '#fff3e0';
-        div.style.color = same ? '#2e7d32' : '#e65100';
+        div.style.background = same ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)';
+        div.style.color = same ? '#34d399' : '#fbbf24';
         div.textContent = same ? '✅ 两个模型预测一致: ' + dataL.result.sentiment : '⚠️ 两个模型预测不一致! LSTM=' + dataL.result.sentiment + ', BERT=' + dataB.result.sentiment;
 
         if (dataL.warning || dataB.warning) {
@@ -367,7 +376,7 @@ function setLoading(on) {
 
 function showError(msg) {
     const errDiv = document.getElementById('error');
-    errDiv.textContent = msg;
+    errDiv.textContent = '❌ ' + msg;
     errDiv.classList.add('show');
 }
 
